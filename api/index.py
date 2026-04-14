@@ -5,7 +5,7 @@ import os
 
 app = Flask(__name__)
 
-# 🔐 API Key (env se lega, default bhi diya hai)
+# 🔐 API KEY
 API_KEY = os.getenv("API_KEY", "ABHAY123API")
 
 
@@ -25,7 +25,7 @@ def lookup_phone_number(phone_number):
         soup = BeautifulSoup(response.text, 'html.parser')
 
         def get_value(label):
-            cell = soup.find(string=lambda t: t and label in t)
+            cell = soup.find(string=lambda t: t and label.lower() in t.lower())
             if cell:
                 tr = cell.find_parent("tr")
                 if tr:
@@ -36,11 +36,24 @@ def lookup_phone_number(phone_number):
 
         data = {
             "Number": phone_number,
+            "Complaints": get_value("Complaints"),
             "Owner Name": get_value("Owner Name"),
-            "Mobile State": get_value("Mobile State"),
             "SIM Card": get_value("SIM card"),
+            "Mobile State": get_value("Mobile State"),
+            "IMEI Number": get_value("IMEI number"),
+            "MAC Address": get_value("MAC address"),
             "Connection": get_value("Connection"),
+            "IP Address": get_value("IP address"),
+            "Owner Address": get_value("Owner Address"),
+            "Hometown": get_value("Hometown"),
+            "Reference City": get_value("Refrence City"),
+            "Owner Personality": get_value("Owner Personality"),
+            "Language": get_value("Language"),
+            "Mobile Locations": get_value("Mobile Locations"),
             "Country": get_value("Country"),
+            "Tracking History": get_value("Tracking History"),
+            "Tracker ID": get_value("Tracker Id"),
+            "Tower Locations": get_value("Tower Locations"),
         }
 
         return data
@@ -59,11 +72,11 @@ def home():
 
 
 @app.route("/api")
-def lookup():
+def api():
     phone_number = request.args.get("number")
     user_key = request.args.get("key")
 
-    # ❌ Key check
+    # 🔑 Key check
     if user_key != API_KEY:
         return jsonify({
             "success": False,
@@ -83,10 +96,10 @@ def lookup():
     return jsonify({
         "success": True,
         "developer": "Abhay Singh",
-        "data": result
+        **result
     })
 
 
-# 🔥 Vercel handler (IMPORTANT)
+# 🔥 Vercel handler
 def handler(request, context):
     return app(request.environ, lambda *args: None)
